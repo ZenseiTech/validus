@@ -11,9 +11,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -59,7 +57,21 @@ public class IntegrationRepositoryTest {
         Song song1 = entityManager.persistAndFlush(song);
         assertThat(songRepository.findById(song1.getId()).get()).isEqualTo(song);
 
+        Set<Artist> artists = new HashSet<>();
+        artists.add(artist1);
+        album1.setArtists(artists);
+        Set<Song> songs = new HashSet<>();
+        songs.add(song);
+        album1.setSongs(songs);
+        entityManager.persistAndFlush(album1);
+
         Album album2 = albumRepository.findById(album1.getId()).get();
         assertThat(album2.getName()).isEqualTo(album1.getName());
+        assertThat(album2.getArtists().size()).isEqualTo(1);
+        assertThat(album2.getSongs().size()).isEqualTo(1);
+
+        albumRepository.delete(album2);
+        Optional<Album> album3 = albumRepository.findById(album2.getId());
+        assertThat(album3.isPresent()).isFalse();
     }
 }
