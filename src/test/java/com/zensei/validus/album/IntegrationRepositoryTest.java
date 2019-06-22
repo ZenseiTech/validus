@@ -30,30 +30,15 @@ public class IntegrationRepositoryTest {
     @Test
     public void it_should_save_album() {
 
-        Album album = new Album();
-        album.setCreated(new Date());
-        album.setLastModified(new Date());
-        album.setName("The Last album");
-        album.setYearReleased(1982);
+        Album album = this.getAlbum("The Last album", 1982);
         Album album1 = entityManager.persistAndFlush(album);
         assertThat(album1.getName()).isEqualTo(album.getName());
 
-        Artist artist = new Artist();
-        artist.setName("Elton John");
-        artist.setCreated(new Date());
-        artist.setLastModified(new Date());
-        Set<Album> albumList = new HashSet<>();
-        albumList.add(album1);
-        artist.setAlbums(albumList);
+        Artist artist = getArtist("Elton John", album1);
         Artist artist1 = entityManager.persistAndFlush(artist);
         assertThat(artistRepository.findById(artist1.getId()).get()).isEqualTo(artist);
 
-        Song song = new Song();
-        song.setName("Song1");
-        song.setTrack(1);
-        song.setCreated(new Date());
-        song.setLastModified(new Date());
-        song.setAlbum(album1);
+        Song song = getSong("Song1", album1);
         Song song1 = entityManager.persistAndFlush(song);
         assertThat(songRepository.findById(song1.getId()).get()).isEqualTo(song);
 
@@ -73,5 +58,35 @@ public class IntegrationRepositoryTest {
         albumRepository.delete(album2);
         Optional<Album> album3 = albumRepository.findById(album2.getId());
         assertThat(album3.isPresent()).isFalse();
+    }
+
+    private Album getAlbum(String name, int year) {
+        Album album = new Album();
+        album.setCreated(new Date());
+        album.setLastModified(new Date());
+        album.setName(name);
+        album.setYearReleased(year);
+        return album;
+    }
+
+    private Artist getArtist(String name, Album album) {
+        Artist artist = new Artist();
+        artist.setName(name);
+        artist.setCreated(new Date());
+        artist.setLastModified(new Date());
+        Set<Album> albumList = new HashSet<>();
+        albumList.add(album);
+        artist.setAlbums(albumList);
+        return artist;
+    }
+
+    private Song getSong(String name, Album album) {
+        Song song = new Song();
+        song.setName(name);
+        song.setTrack(1);
+        song.setCreated(new Date());
+        song.setLastModified(new Date());
+        song.setAlbum(album);
+        return song;
     }
 }
